@@ -16,7 +16,7 @@ def retrieve_schedule(year, team, first_game):
     """
 
     # establishing connection and cursor
-    # TODO create a txt file to store the connection information and pull from there
+    # TODO create a txt file to store the connection information and pull from there/change password
     cnx = mysql.connector.connect(user='nfl_retrieval_app',
                                   password='indesCYTJd2cLgt7LoAQ',
                                   host='localhost',
