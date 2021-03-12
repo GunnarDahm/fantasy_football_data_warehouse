@@ -3,7 +3,7 @@
 This repo serves to house the scripts for the creation and upkeep of my fantasy football data warehouse. 
 Additionally, some analysis and ml work will be housed here as well.
 
-##Status: In Progress
+## Status: In Progress
 
 ## To Do:
 - Complete ReadMe
@@ -26,6 +26,22 @@ the self-service dashboard, and the ML models.
 
 ### Data Warehouse
 The first component that is the data warehouse that will serve every other component of this project. 
+
+#### Table Structure
+
+##### Table Relationship Diagram 
+<img src="..\img\dw_erd.png" style="float" height=100/>
+
+#### Data Pipelines
+##### Team Retrieval
+
+##### Game Retrieval
+
+##### Player Retrieval
+
+##### Performance Retrieval
+
+##### Master Retrieval
 
 ### Analysis Library
 

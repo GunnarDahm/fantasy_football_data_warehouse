@@ -113,4 +113,4 @@ def update_games(year, first_game):
     print('Table "Games" updated for {}'.format(year))
 
 
-update_games(year=2020, first_game='2020/09/10')
+#update_games(year=2020, first_game='2020/09/10')
