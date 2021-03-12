@@ -29,8 +29,8 @@ The first component that is the data warehouse that will serve every other compo
 
 #### Table Structure
 
-##### Table Relationship Diagram 
-<img src="..\img\dw_erd.png" style="float" height=100/>
+##### Entity Relationship Diagram 
+<img src="..\img\dw_erd.png" alt="Data Warehouse ERD" width="1000" style="float:left" />
 
 #### Data Pipelines
 ##### Team Retrieval
