@@ -1,8 +1,9 @@
 import datetime as dt
-import mysql.connector
+import pandas as pd
 from sportsipy.nfl.teams import Team
 from sportsipy.nfl.teams import Teams
 from sportsipy.nfl.boxscore import Boxscore
+import sqlalchemy as sql
 
 # Pulling from https://www.sports-reference.com/
 
@@ -17,13 +18,7 @@ def retrieve_schedule(year, team, first_game):
 
     # establishing connection and cursor
     # TODO create a txt file to store the connection information and pull from there/change password
-    cnx = mysql.connector.connect(user='nfl_retrieval_app',
-                                  password='indesCYTJd2cLgt7LoAQ',
-                                  host='localhost',
-                                  database='nfl',
-                                  auth_plugin='mysql_native_password')
-
-    cursor = cnx.cursor()
+    engine = sql.create_engine("mysql+pymysql://nfl_retrieval_app:indesCYTJd2cLgt7LoAQ@localhost:3306/nfl")
 
     # Establishing some necessary objects for iteration
     schedule = Team(team_name=team, year=year).schedule
@@ -49,11 +44,12 @@ def retrieve_schedule(year, team, first_game):
 
         # handling for Jan/Feb spillover into the next year
         if str(game).split(' ')[0] == 'January' or str(game).split(' ')[0] == 'February':
-            boxscore = Boxscore(uri=(str(year + 1) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0'
-                                     + team.lower()))
+            game_id=str(year + 1) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
+
+            boxscore = Boxscore(uri=game_id)
         else:
-            boxscore = Boxscore(uri=(str(year) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0'
-                                     + team.lower()))
+            game_id = str(year) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
+            boxscore = Boxscore(uri=game_id)
 
         # boxscore url's are only generated for home games, so handling for such exceptions
         if boxscore.home_abbreviation == 'None':
@@ -62,12 +58,10 @@ def retrieve_schedule(year, team, first_game):
         else:
             # Unique index already created to avoid duplicates in table when updating, error handling for this
             try:
-                # SQL command
-                add_game = (
-                    "INSERT INTO games (home ,away ,home_score ,away_score, season, week_no, game_date)"
-                    "VALUES (%(home)s,%(away)s, %(home_score)s, %(away_score)s, %(season)s,%(week_no)s,%(game_date)s)")
+
 
                 game_data = {
+                    'game_id':game_id,
                     'home': str(boxscore.home_abbreviation).upper(),
                     'away': str(boxscore.away_abbreviation).upper(),
                     'home_score': boxscore.home_points,
@@ -77,7 +71,9 @@ def retrieve_schedule(year, team, first_game):
                     'game_date': dt.date.strftime(boxscore.datetime, '%Y-%m-%d')
                 }
 
-                cursor.execute(add_game, game_data)
+                df = pd.DataFrame(game_data, index=[0])
+
+                df.to_sql('games', con=engine, index=False, if_exists='append')
 
                 print('Game inputted: {} vs. {} on {} (Week {})'.format(str(boxscore.home_abbreviation),
                                                                         str(boxscore.away_abbreviation),
@@ -85,16 +81,11 @@ def retrieve_schedule(year, team, first_game):
                                                                         ((boxscore.datetime - dt.datetime.strptime(
                                                                             first_game, '%Y/%m/%d')).days // 7) + 1))
 
-            except mysql.connector.errors.IntegrityError:
+            except sql.exc.IntegrityError:
                 print('Game: {} vs. {} on {} already present in table.'.format(str(boxscore.home_abbreviation),
                                                                                str(boxscore.away_abbreviation),
                                                                                dt.date.strftime(boxscore.datetime,
                                                                                                 '%Y-%m-%d')))
-
-    # committing and closing the cursor and connection
-    cnx.commit()
-    cursor.close()
-    cnx.close()
 
     print('Schedule inputted: {} for {}'.format(team, year))
 
@@ -113,4 +104,4 @@ def update_games(year, first_game):
     print('Table "Games" updated for {}'.format(year))
 
 
-#update_games(year=2020, first_game='2020/09/10')
+update_games(year=2020, first_game='2020/09/10')
