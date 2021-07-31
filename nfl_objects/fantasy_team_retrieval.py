@@ -21,6 +21,8 @@ class league_data_prv:
         url = "https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/" + str(self.league_id) + \
         "?seasonId=" + str(self.year)
 
+        print(url)
+
         try:
             r=requests.get(url)
         except:
@@ -30,10 +32,14 @@ class league_data_prv:
         # Previous seasons return a list of 1 with a JSON object inside for some reason
         #TODO return data as a dataframe
 
-        return r.json()[0]
+        #return r.json()
+
+        tms= r.json()[0]
+        print(tms)
+
+        for tm in tms['members']:
+            print(tm)
 
 
-my_season_2018=league_info_prv(league_id=819126, year=2018).get_data()
-
-print(my_season_2018)
+my_season_2018=league_data_prv(league_id=819126, year=2020).get_data()
 

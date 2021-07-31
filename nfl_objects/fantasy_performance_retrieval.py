@@ -131,8 +131,8 @@ class Player_Data:
 
 
 season_2018=Player_Data(league_id=819126,
-                         year=2019,
+                         year=2020,
                          espn_s2="AEBz5srHGNwu0R59Kph1V6HlwJ5fEvDV2J3tcsrtJMSFPl37c%2FgTvZgEkOO2yCNUIHYsmcl4Ik6opp5BE4c5GWoFZNUd%2FbVm%2FDyf7XOBpZyZ3EDejSXTDv1aZMhD13Um3ImdsQ%2BfRxDiZX%2BKw3cx%2F6sLV1XJHOS5mbeKvozbGujHQuDS78qVzUofSCqbiMs9LzsFOLOjRBLfXipjUmdCa7ozwW8ceNymLBXoQnZUdqdkjynhuMs9Ovg7QoWLX8kml1GxHYxN9kUm6gRZipwFlVygVNpGcuBt1bDJS6Of2V0FMA%3D%3D",
                          swid = "{0581F0A8-617D-47D8-81F0-A8617D37D85B}").get_data()
-#
-# print(season_2018.head(5))
+
+print(season_2018)
