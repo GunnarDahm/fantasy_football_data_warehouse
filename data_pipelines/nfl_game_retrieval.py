@@ -4,10 +4,11 @@ from sportsipy.nfl.teams import Team
 from sportsipy.nfl.teams import Teams
 from sportsipy.nfl.boxscore import Boxscore
 import sqlalchemy as sql
+import json
 
 # Pulling from https://www.sports-reference.com/
 
-def retrieve_schedule(year, team, first_game):
+def retrieve_schedule(season, team, first_game, cred='credentials.json'):
     """Used to retrieve the schedule information for played games of a specified team and insert the info into the NFL
     DB in the local MySQL server.
     year: int of year the season started in, takes into account spillover into Jan/Feb
@@ -17,11 +18,17 @@ def retrieve_schedule(year, team, first_game):
     """
 
     # establishing connection and cursor
-    # TODO create a txt file to store the connection information and pull from there/change password
-    engine = sql.create_engine("mysql+pymysql://nfl_retrieval_app:indesCYTJd2cLgt7LoAQ@localhost:3306/nfl")
+    f = open(cred)
+
+    login=json.load(f)
+
+    engine = sql.create_engine("mysql+pymysql://{}:{}@localhost:3306/nfl".format(str(login['userId']),
+                                                                                 str(login['password'])))
+
+    f.close()
 
     # Establishing some necessary objects for iteration
-    schedule = Team(team_name=team, year=year).schedule
+    schedule = Team(team_name=team, year=season).schedule
     months_dict = {'January': '01',
                    'February': '02',
                    'March': '03',
@@ -44,11 +51,11 @@ def retrieve_schedule(year, team, first_game):
 
         # handling for Jan/Feb spillover into the next year
         if str(game).split(' ')[0] == 'January' or str(game).split(' ')[0] == 'February':
-            game_id=str(year + 1) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
+            game_id=str(season + 1) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
 
             boxscore = Boxscore(uri=game_id)
         else:
-            game_id = str(year) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
+            game_id = str(season) + months_dict[game_split[0]] + str(game_split[1].zfill(2)) + '0' + team.lower()
             boxscore = Boxscore(uri=game_id)
 
         # boxscore url's are only generated for home games, so handling for such exceptions
@@ -66,14 +73,14 @@ def retrieve_schedule(year, team, first_game):
                     'away': str(boxscore.away_abbreviation).upper(),
                     'home_score': boxscore.home_points,
                     'away_score': boxscore.away_points,
-                    'season': year,
+                    'season': season,
                     'week_no': ((boxscore.datetime - dt.datetime.strptime(first_game, '%Y/%m/%d')).days // 7) + 1,
                     'game_date': dt.date.strftime(boxscore.datetime, '%Y-%m-%d')
                 }
 
                 df = pd.DataFrame(game_data, index=[0])
 
-                df.to_sql('games', con=engine, index=False, if_exists='append')
+                df.to_sql('dim_nfl_games', con=engine, index=False, if_exists='append')
 
                 print('Game inputted: {} vs. {} on {} (Week {})'.format(str(boxscore.home_abbreviation),
                                                                         str(boxscore.away_abbreviation),
@@ -87,10 +94,10 @@ def retrieve_schedule(year, team, first_game):
                                                                                dt.date.strftime(boxscore.datetime,
                                                                                                 '%Y-%m-%d')))
 
-    print('Schedule inputted: {} for {}'.format(team, year))
+    print('Schedule inputted: {} for {}'.format(team, season))
 
 
-def update_games(year, first_game):
+def update_games(season, first_game):
     """
     Function to iterate through all teams and update the games table for specified year
     :param year: int of year the season started in, takes into account spillover into Jan/Feb
@@ -98,10 +105,11 @@ def update_games(year, first_game):
     :return: None, Games table updated
     """
 
-    for team in Teams():
-        retrieve_schedule(year=year, team=str(team.abbreviation).upper(), first_game=first_game)
+    for team in Teams(year=season):
+        retrieve_schedule(season=season, team=str(team.abbreviation).upper(), first_game=first_game)
 
-    print('Table "Games" updated for {}'.format(year))
+    print('Table "Games" updated for {}'.format(season))
 
 
-update_games(year=2020, first_game='2020/09/10')
+update_games(season=2020, first_game='2020/09/10')
+

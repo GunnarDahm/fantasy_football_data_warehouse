@@ -4,15 +4,21 @@ from sportsipy.nfl.teams import Team
 import sportsipy.nfl.teams as Teams
 from sportsipy.nfl.boxscore import Boxscore
 import sqlalchemy as sql
-import pymysql
+import json
 
+def get_nfl_player_performance(season, cred='credentials.json'):
+    # establishing connection and cursor
+    f = open(cred)
 
-def get_player_performance(season, week):
-    # Establishing connection
-    engine = sql.create_engine("mysql+pymysql://nfl_retrieval_app:indesCYTJd2cLgt7LoAQ@localhost:3306/nfl")
+    login = json.load(f)
+
+    engine = sql.create_engine("mysql+pymysql://{}:{}@localhost:3306/nfl".format(str(login['userId']),
+                                                                                 str(login['password'])))
+
+    f.close()
 
     # Iterating through teams
-    teams = Teams.Teams()
+    teams = Teams.Teams(year=season)
 
     for team in teams:
         team_id = team.abbreviation.upper()
@@ -64,7 +70,7 @@ def get_player_performance(season, week):
                     home_df['player_id']=home_df.index[0]
 
                     try:
-                        home_df.to_sql('performance', con=engine, index=False, if_exists='append')
+                        home_df.to_sql('fact_nfl_performance', con=engine, index=False, if_exists='append')
                         print('Inputted: {} {} for game {}.'.format(player.name, team_id, game_id))
 
                     except sql.exc.IntegrityError:
@@ -76,7 +82,6 @@ def get_player_performance(season, week):
 
                 # inputting away player performance
                 for player in boxscore.away_players:
-                    away_df = player.dataframe
 
                     away_df = player.dataframe
 
@@ -85,7 +90,7 @@ def get_player_performance(season, week):
                     away_df['player_id'] = away_df.index[0]
 
                     try:
-                        away_df.to_sql('performance', con=engine, index=False, if_exists='append')
+                        away_df.to_sql('fact_nfl_performance', con=engine, index=False, if_exists='append')
                         print('Inputted: {} {} for game {}.'.format(player.name, team_id, game_id))
 
                     except sql.exc.IntegrityError:
@@ -97,4 +102,5 @@ def get_player_performance(season, week):
 
 
 
-get_player_performance(season=2020, week=1)
+get_nfl_player_performance(season=2020)
+

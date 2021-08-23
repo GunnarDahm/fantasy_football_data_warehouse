@@ -8,7 +8,6 @@ Additionally, some analysis and ml work will be housed here as well.
 ## To Do:
 - Complete ReadMe
 - Complete pipelines into fantasy football data warehouse
-- Refactor Pipelines to use SQLAlchemy
 - Create python analysis objects
 - Create Tableau Public Dashboard connected to data warehouse
 - Begin work on ML/AI functionalities
@@ -44,14 +43,17 @@ and Player ID. For each record, player fantasy stats and vegas odds are tracked.
 
 ##### Entity Relationship Diagram 
 ![Data Warehouse ERD](.\img\dw_erd.png)
+- Will need an intermediary defense view that connects the nfl player concept to the fantasy football player concept
 
 #### Data Pipelines
 
-- Team Retrieval (Status: Complete) : Updates teams in Teams and Fantasy Teams table. 
-- Game Retrieval (Status: Complete): Upates game schedules for a specific season for games and fantasy games table
-- Player Retrieval (Status: Complete): Updates player table with static information about the player
-- Performance Retrieval: (Status: Complete): Updates player performance table 
-- Fantasy Team Retrieval 
+- nfl_team_retrieval (Status: Complete) : Updates teams in Teams and Fantasy Teams table. 
+- nfl_game_retrieval (Status: Complete): Upates game schedules for a specific season for games and fantasy games table
+- nfl_player_retrieval (Status: Complete): Updates player table with static information about the player
+- nfl_performance_retrieval: (Status: Complete): Updates player performance table 
+- ff_team_retrieval: (Status: Complete): 
+- ff_game_retrieval (Status: Complete):
+- ff_performance_retrieval (Status: Complete): 
 - Master Retrieval
 
 ### Analysis Library
