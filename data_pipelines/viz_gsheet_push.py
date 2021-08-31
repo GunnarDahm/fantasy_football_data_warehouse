@@ -11,28 +11,10 @@ engine = sql.create_engine("mysql+pymysql://{}:{}@localhost:3306/nfl".format('nf
 # placeholder query, will likely replace with a full view
 # TODO update to push multiple queries as visualization needs are finalized
 
-player_data = engine.execute('''SELECT
-	p.first_name,
-    p.last_name,
-    p.position,
-    SUM(f.projected_pts) as total_proj_pts,
-    SUM(f.actual_pts) total_act_pts,
-    AVG(f.projected_pts) as avg_proj_pts,
-    AVG(f.actual_pts) as avg_actual_pts,
-    COUNT(f.game_id) as starts
-FROM fact_ff_performance as f
-
-INNER JOIN dim_nfl_players as p
-	ON f.player_id = p.player_id
-
-WHERE
-    1=1
-
-GROUP BY
-    1, 2, 3
-
-ORDER BY
-    4 DESC
+player_data = engine.execute('''
+SELECT
+    *
+FROM viz_player_raw
 
 ''')
 
